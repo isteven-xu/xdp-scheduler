@@ -845,7 +845,7 @@ class Airflow(AirflowBaseView):
             filtered_dag_count = get_query_count(dags_query, session=session)
             if filtered_dag_count == 0 and len(arg_tags_filter):
                 flash(
-                    "No matching DAG tags found.",
+                    "未找到匹配的流程标签。",
                     "warning",
                 )
                 flask_session[FILTER_TAGS_COOKIE] = None
@@ -1043,17 +1043,16 @@ class Airflow(AirflowBaseView):
                             for dag_id in file_dag_ids
                         ]
                         if not get_auth_manager().batch_is_authorized_dag(requests):
-                            stacktrace = "REDACTED - you do not have read permission on all DAGs in the file"
+                            stacktrace = "已隐藏 - 您没有权限读取该文件中的所有流程"
                     flash(
-                        f"Broken DAG: [{import_error.filename}]\r{stacktrace}",
+                        f"损坏的 DAG: [{import_error.filename}]\r{stacktrace}",
                         "dag_import_error",
                     )
-
         from airflow.plugins_manager import import_errors as plugin_import_errors
 
         for filename, stacktrace in plugin_import_errors.items():
             flash(
-                f"Broken plugin: [{filename}] {stacktrace}",
+                f"损坏的插件: [{filename}] {stacktrace}",
                 "error",
             )
 
@@ -1091,12 +1090,12 @@ class Airflow(AirflowBaseView):
             if robots_file_access_count > 0:
                 flash(
                     Markup(
-                        "Recent requests have been made to /robots.txt. "
-                        "This indicates that this deployment may be accessible to the public internet. "
-                        "This warning can be disabled by setting webserver.warn_deployment_exposure=False in "
-                        "airflow.cfg. Read more about web deployment security <a href="
+                        "最近收到了对 /robots.txt 的请求。 "
+                        "这表明此部署可能对公共互联网开放。 "
+                        "可以通过在 airflow.cfg 中设置 webserver.warn_deployment_exposure=False 来禁用此警告。 "
+                        "阅读更多关于 Web 部署安全的信息 <a href="
                         f'"{get_docs_url("security/webserver.html")}">'
-                        "here</a>"
+                        "请点击此处</a>"
                     ),
                     "warning",
                 )
@@ -1460,7 +1459,7 @@ class Airflow(AirflowBaseView):
             if ti:
                 ti.refresh_from_task(raw_task)
             else:
-                flash(f"there is no task instance with the provided map_index {map_index}", "error")
+                flash(f"提供的 map_index {map_index} 没有对应的任务实例", "error")
                 return self.render_template(
                     "airflow/ti_code.html",
                     show_trigger_form_if_no_params=conf.getboolean(
@@ -1481,12 +1480,12 @@ class Airflow(AirflowBaseView):
             ti.get_rendered_template_fields(session=session)
         except AirflowException as e:
             if not e.__cause__:
-                flash(f"Error rendering template: {e}", "error")
+                flash(f"渲染模板时出错: {e}", "error")
             else:
-                msg = Markup("Error rendering template: {0}<br><br>OriginalError: {0.__cause__}").format(e)
+                msg = Markup("渲染模板时出错: {0}<br><br>原始错误: {0.__cause__}").format(e)
                 flash(msg, "error")
         except Exception as e:
-            flash(f"Error rendering template: {e}", "error")
+            flash(f"渲染模板时出错: {e}", "error")
 
         # Ensure we are rendering the unmapped operator. Unmapping should be
         # done automatically if template fields are rendered successfully; this
@@ -1582,18 +1581,18 @@ class Airflow(AirflowBaseView):
             pod_spec = get_rendered_k8s_spec(ti, session=session)
         except AirflowException as e:
             if not e.__cause__:
-                flash(f"Error rendering Kubernetes POD Spec: {e}", "error")
+                flash(f"渲染 Kubernetes POD 配置时出错: {e}", "error")
             else:
-                tmp = Markup("Error rendering Kubernetes POD Spec: {0}<br><br>Original error: {0.__cause__}")
+                tmp = Markup("渲染 Kubernetes POD 配置时出错: {0}<br><br>原始错误: {0.__cause__}")
                 flash(tmp.format(e), "error")
         except Exception as e:
-            flash(f"Error rendering Kubernetes Pod Spec: {e}", "error")
-        title = "Rendered K8s Pod Spec"
+            flash(f"渲染 Kubernetes Pod 配置时出错: {e}", "error")
+        title = "渲染的 K8s Pod 配置"
 
         if pod_spec:
             content = wwwutils.get_attr_renderer()["yaml"](yaml.dump(pod_spec))
         else:
-            content = Markup("<pre><code>Error rendering Kubernetes POD Spec</pre></code>")
+            content = Markup("<pre><code>渲染 Kubernetes POD 配置时出错</pre></code>")
 
         return self.render_template(
             "airflow/ti_code.html",
@@ -1798,12 +1797,12 @@ class Airflow(AirflowBaseView):
         )
 
         if not ti:
-            flash(f"Task [{dag_id}.{task_id}] does not exist", "error")
+            flash(f"任务 [{dag_id}.{task_id}] 不存在", "error")
             return redirect(url_for("Airflow.index"))
 
         task_log_reader = TaskLogReader()
         if not task_log_reader.supports_external_link:
-            flash("Task log handler does not support external links", "error")
+            flash("任务日志处理器不支持外部链接", "error")
             return redirect(url_for("Airflow.index"))
 
         handler = task_log_reader.log_handler
@@ -1953,7 +1952,7 @@ class Airflow(AirflowBaseView):
         )
 
         if not ti:
-            flash(f"Task [{dag_id}.{task_id}] doesn't seem to exist at the moment", "error")
+            flash(f"任务 [{dag_id}.{task_id}] 当前似乎不存在", "error")
             return redirect(url_for("Airflow.index"))
 
         xcom_query = session.scalars(
@@ -1997,18 +1996,17 @@ class Airflow(AirflowBaseView):
         try:
             delete_dag.delete_dag(dag_id)
         except DagNotFound:
-            flash(f"DAG with id {dag_id} not found. Cannot delete", "error")
+            flash(f"未找到 ID 为 {dag_id} 的流程，无法删除", "error")
             return redirect(redirect_url)
         except AirflowException:
             flash(
-                f"Cannot delete DAG with id {dag_id} because some task instances of the DAG "
-                "are still running. Please mark the  task instances as "
-                "failed/succeeded before deleting the DAG",
+                f"无法删除 ID 为 {dag_id} 的流程，因为该流程的某些任务实例仍在运行。"
+                "请在删除流程之前将任务实例标记为失败/成功。",
                 "error",
             )
             return redirect(redirect_url)
 
-        flash(f"Deleting DAG with id {dag_id}. May take a couple minutes to fully disappear.")
+        flash(f"正在删除 ID 为 {dag_id} 的流程。可能需要几分钟才能完全消失。")
 
         # Upon success return to origin.
         return redirect(origin)
@@ -2077,18 +2075,17 @@ class Airflow(AirflowBaseView):
                         form_field["value"] = json.loads(request.values.get(k, ""))
                     except JSONDecodeError:
                         flash(
-                            f'Could not pre-populate field "{k}" due to parsing error of value "{request.values.get(k)}"'
+                            f'由于值 "{request.values.get(k)}" 的解析错误，无法预填充字段 "{k}"'
                         )
                 else:
                     form_field["value"] = request.values.get(k)
         if form_trust_problems:
             flash(
                 Markup(
-                    "At least one field in the trigger form uses a raw HTML form definition. This is not allowed for "
-                    "security. Please switch to markdown description via <code>description_md</code>. "
-                    "Raw HTML is deprecated and must be enabled via "
-                    "<code>webserver.allow_raw_html_descriptions</code> configuration parameter. Using plain text "
-                    "as fallback for these fields. "
+                    "触发表单中至少有一个字段使用了原始的 HTML 表单定义。出于安全考虑，这是不允许的。"
+                    "请通过 <code>description_md</code> 切换到 Markdown 描述。"
+                    "原始 HTML 已被弃用，必须通过配置参数 <code>webserver.allow_raw_html_descriptions</code> 启用。"
+                    "对这些字段使用纯文本作为回退。"
                     f"<ul><li>{'</li><li>'.join(form_trust_problems)}</li></ul>"
                 ),
                 "warning",
@@ -2096,29 +2093,28 @@ class Airflow(AirflowBaseView):
         if allow_raw_html_descriptions and any("description_html" in p.schema for p in dag.params.values()):
             flash(
                 Markup(
-                    "The form params use raw HTML in <code>description_html</code> which is deprecated. "
-                    "Please migrate to <code>description_md</code>."
+                    "表单参数在 <code>description_html</code> 中使用了原始的 HTML，这已被弃用。"
+                    "请迁移到 <code>description_md</code>。"
                 ),
                 "warning",
             )
         if allow_raw_html_descriptions and any("custom_html_form" in p.schema for p in dag.params.values()):
             flash(
                 Markup(
-                    "The form params use <code>custom_html_form</code> definition. "
-                    "This is deprecated with Airflow 2.8.0 and will be removed in a future release."
+                    "表单参数使用了 <code>custom_html_form</code> 定义。"
+                    "这在 Airflow 2.8.0 中已被弃用，并将在未来的版本中移除。"
                 ),
                 "warning",
             )
-
         ui_fields_defined = any("const" not in f["schema"] for f in form_fields.values())
         show_trigger_form_if_no_params = conf.getboolean("webserver", "show_trigger_form_if_no_params")
 
         if not dag_orm:
-            flash(f"Cannot find dag {dag_id}")
+            flash(f"找不到流程 {dag_id}")
             return redirect(origin)
 
         if dag_orm.has_import_errors:
-            flash(f"Cannot create dagruns because the dag {dag_id} has import errors", "error")
+            flash(f"无法创建流程运行，因为流程 {dag_id} 存在导入错误", "error")
             return redirect(origin)
 
         num_recent_confs = conf.getint("webserver", "num_recent_configurations_for_trigger")
@@ -2172,7 +2168,7 @@ class Airflow(AirflowBaseView):
                         cls=utils_json.WebEncoder,
                     )
                 except TypeError:
-                    flash("Could not pre-populate conf field due to non-JSON-serializable data-types")
+                    flash("由于非 JSON 可序列化的数据类型，无法预填充 conf 字段")
             return self.render_template(
                 "airflow/trigger.html",
                 form_fields=form_fields,
@@ -2184,7 +2180,7 @@ class Airflow(AirflowBaseView):
         try:
             execution_date = timezone.parse(request_execution_date, strict=True)
         except ParserError:
-            flash("Invalid execution date", "error")
+            flash("无效的执行日期", "error")
             form = DateTimeForm(data={"execution_date": timezone.utcnow().isoformat()})
             return self.render_template(
                 "airflow/trigger.html",
@@ -2199,7 +2195,7 @@ class Airflow(AirflowBaseView):
             if dr.run_id == run_id:
                 message = f"The run ID {run_id} already exists"
             else:
-                message = f"The logical date {execution_date} already exists"
+                message = f"逻辑日期 {execution_date} 已存在"
             flash(message, "error")
             return redirect(origin)
 
@@ -2207,8 +2203,7 @@ class Airflow(AirflowBaseView):
         if run_id and not re2.match(RUN_ID_REGEX, run_id):
             if not regex.strip() or not re2.match(regex.strip(), run_id):
                 flash(
-                    f"The provided run ID '{run_id}' is invalid. It does not match either "
-                    f"the configured pattern: '{regex}' or the built-in pattern: '{RUN_ID_REGEX}'",
+                    f"提供的运行 ID '{run_id}' 无效。它既不符合配置的模式: '{regex}'，也不符合内置模式: '{RUN_ID_REGEX}'",
                     "error",
                 )
 
@@ -2226,7 +2221,7 @@ class Airflow(AirflowBaseView):
             try:
                 run_conf = json.loads(request_conf)
                 if not isinstance(run_conf, dict):
-                    flash("Invalid JSON configuration, must be a dict", "error")
+                    flash("无效的 JSON 配置，必须是一个字典", "error")
                     form = DateTimeForm(data={"execution_date": execution_date})
                     return self.render_template(
                         "airflow/trigger.html",
@@ -2236,7 +2231,7 @@ class Airflow(AirflowBaseView):
                         form=form,
                     )
             except json.decoder.JSONDecodeError:
-                flash("Invalid JSON configuration, not parseable", "error")
+                flash("无效的 JSON 配置，无法解析", "error")
                 form = DateTimeForm(data={"execution_date": execution_date})
                 return self.render_template(
                     "airflow/trigger.html",
@@ -2248,13 +2243,13 @@ class Airflow(AirflowBaseView):
 
         if dag.get_is_paused():
             if unpause or not ui_fields_defined:
-                flash(f"Unpaused DAG {dag_id}.")
+                flash(f"已取消暂停流程 {dag_id}。")
                 dag_model = models.DagModel.get_dagmodel(dag_id)
                 if dag_model is not None:
                     dag_model.set_is_paused(is_paused=False)
             else:
                 flash(
-                    f"DAG {dag_id} is paused, unpause if you want to have the triggered run being executed.",
+                    f"流程 {dag_id} 已暂停，如果您希望触发的运行被执行，请取消暂停。",
                     "warning",
                 )
 
@@ -2644,7 +2639,7 @@ class Airflow(AirflowBaseView):
         dag: DAG = get_airflow_app().dag_bag.get_dag(dag_id)
 
         if not run_id:
-            flash(f"Cannot mark tasks as {state}, seem that DAG {dag_id} has never run", "error")
+            flash(f"无法将任务标记为 {state}，似乎流程 {dag_id} 从未运行过", "error")
             return redirect(origin)
 
         altered = dag.set_task_instance_state(
@@ -2658,7 +2653,7 @@ class Airflow(AirflowBaseView):
             past=past,
         )
 
-        flash(f"Marked {state} on {len(altered)} task instances")
+        flash(f"已在 {len(altered)} 个任务实例上标记为 {state}")
         return redirect(origin)
 
     def _mark_task_group_state(
@@ -2677,7 +2672,7 @@ class Airflow(AirflowBaseView):
         dag: DAG = get_airflow_app().dag_bag.get_dag(dag_id)
 
         if not run_id:
-            flash(f"Cannot mark tasks as {state}, as DAG {dag_id} has never run", "error")
+            flash(f"无法将任务标记为 {state}，因为流程 {dag_id} 从未运行过", "error")
             return redirect(origin)
 
         altered = dag.set_task_group_state(
@@ -2690,7 +2685,7 @@ class Airflow(AirflowBaseView):
             past=past,
         )
 
-        flash(f"Marked {state} on {len(altered)} task instances")
+        flash(f"已在 {len(altered)} 个任务实例上标记为 {state}")
         return redirect(origin)
 
     @expose("/confirm", methods=["GET"])
@@ -2916,7 +2911,7 @@ class Airflow(AirflowBaseView):
         url_serializer = URLSafeSerializer(current_app.config["SECRET_KEY"])
         dag_model = DagModel.get_dagmodel(dag_id, session=session)
         if not dag:
-            flash(f'DAG "{dag_id}" seems to be missing from DagBag.', "error")
+            flash(f'流程 "{dag_id}" 似乎未在 DagBag 中找到。', "error")
             return redirect(url_for("Airflow.index"))
         wwwutils.check_import_errors(dag.fileloc, session)
         wwwutils.check_dag_warnings(dag.dag_id, session)
@@ -3109,7 +3104,7 @@ class Airflow(AirflowBaseView):
         """Redirect to the replacement - grid + graph. Kept for backwards compatibility."""
         dag = get_airflow_app().dag_bag.get_dag(dag_id, session=session)
         if not dag:
-            flash(f'DAG "{dag_id}" seems to be missing from DagBag.', "error")
+            flash(f'流程 "{dag_id}" 似乎未在 DagBag 中找到。', "error")
             return redirect(url_for("Airflow.index"))
         dt_nr_dr_data = get_date_time_num_runs_dag_runs_form_data(request, session, dag)
         dttm = dt_nr_dr_data["dttm"]
@@ -3663,7 +3658,7 @@ class Airflow(AirflowBaseView):
             response_messages = {
                 201: ["重新解析请求提交成功", "info"],
                 401: ["未认证的请求", "error"],
-                403: ["权限被拒绝d", "error"],
+                403: ["权限被拒绝", "error"],
                 404: ["未找到流程", "error"],
             }
             flash(response_messages[response.status_code][0], response_messages[response.status_code][1])
@@ -4002,10 +3997,10 @@ class SlaMissModelView(AirflowModelView):
                 setattr(sla, attr, new_value)
                 session.merge(sla)
             session.commit()
-            flash(f"{count} SLAMisses had {attr} set to {new_value}.")
+            flash(f"{count} 个 SLAMisses 的 {attr} 已设置为 {new_value}。")
         except Exception as ex:
             flash(str(ex), "error")
-            flash("Failed to set state", "error")
+            flash("设置状态失败", "error")
         self.update_redirect()
         return redirect(self.get_default_url())
 
@@ -4310,8 +4305,8 @@ class ConnectionModelView(AirflowModelView):
                 new_conn_id = next(possible_conn_id_iter)
             except StopIteration:
                 flash(
-                    f"Connection {new_conn_id} can't be added because it already exists, "
-                    f"Please rename the existing connections",
+                    f"无法添加连接 {new_conn_id}，因为它已经存在。"
+                    f"请重命名现有的连接",
                     "warning",
                 )
             else:
@@ -4330,11 +4325,11 @@ class ConnectionModelView(AirflowModelView):
                 try:
                     session.add(dup_conn)
                     session.commit()
-                    flash(f"Connection {new_conn_id} added successfully.", "success")
+                    flash(f"连接 {new_conn_id} 添加成功。", "success")
                 except IntegrityError:
                     flash(
-                        f"Connection {new_conn_id} can't be added. Integrity error, "
-                        f"probably unique constraint.",
+                        f"无法添加连接 {new_conn_id}。完整性错误，"
+                        f"可能是唯一性约束问题。",
                         "warning",
                     )
                     session.rollback()
@@ -4359,11 +4354,10 @@ class ConnectionModelView(AirflowModelView):
             except (JSONDecodeError, TypeError):
                 flash(
                     Markup(
-                        "<p>The <em>Extra</em> connection field contained an invalid value for Conn ID: "
-                        "<q>{conn_id}</q>.</p>"
-                        "<p>If connection parameters need to be added to <em>Extra</em>, "
-                        "please make sure they are in the form of a single, valid JSON object.</p><br>"
-                        "The following <em>Extra</em> parameters were <b>not</b> added to the connection:<br>"
+                        "<p>连接 ID 为 <q>{conn_id}</q> 的 <em>Extra</em> 连接字段包含无效值。</p>"
+                        "<p>如果需要将连接参数添加到 <em>Extra</em>，"
+                        "请确保它们以单个有效的 JSON 对象形式存在。</p><br>"
+                        "以下 <em>Extra</em> 参数 <b>未</b> 添加到连接中：<br>"
                         "{extra_json}"
                     ).format(conn_id=conn_id, extra_json=extra_json),
                     category="error",
@@ -4608,7 +4602,7 @@ class PoolModelView(AirflowModelView):
     def action_muldelete(self, items):
         """Multiple delete."""
         if any(item.pool == models.Pool.DEFAULT_POOL_NAME for item in items):
-            flash(f"{models.Pool.DEFAULT_POOL_NAME} cannot be deleted", "error")
+            flash(f"{models.Pool.DEFAULT_POOL_NAME} 无法删除", "error")
             self.update_redirect()
             return redirect(self.get_redirect())
         self.datamodel.delete_all(items)
@@ -4620,7 +4614,7 @@ class PoolModelView(AirflowModelView):
     def delete(self, pk):
         """Single delete."""
         if models.Pool.is_default_pool(pk):
-            flash(f"{models.Pool.DEFAULT_POOL_NAME} cannot be deleted", "error")
+            flash(f"{models.Pool.DEFAULT_POOL_NAME} 无法删除", "error")
             self.update_redirect()
             return redirect(self.get_redirect())
 
@@ -4817,7 +4811,7 @@ class VariableModelView(AirflowModelView):
             action_on_existing = request.form.get("action_if_exists", "overwrite").lower()
         except Exception:
             self.update_redirect()
-            flash("Missing file or syntax error.", "error")
+            flash("文件缺失或语法错误。", "error")
             return redirect(self.get_redirect())
         else:
             existing_keys = set()
@@ -4827,7 +4821,7 @@ class VariableModelView(AirflowModelView):
                 )
             if action_on_existing == "fail" and existing_keys:
                 failed_repr = ", ".join(repr(k) for k in sorted(existing_keys))
-                flash(f"Failed. The variables with these keys: {failed_repr}  already exists.")
+                flash(f"失败。以下键对应的变量已存在：{failed_repr}。")
                 logger.error("Failed. The variables with these keys: %s already exists.", failed_repr)
                 self.update_redirect()
                 return redirect(self.get_redirect())
@@ -4845,14 +4839,14 @@ class VariableModelView(AirflowModelView):
                     fail_count += 1
                 else:
                     suc_count += 1
-            flash(f"{suc_count} variable(s) successfully updated.")
+            flash(f"{suc_count} 个变量已成功更新。")
             if fail_count:
-                flash(f"{fail_count} variable(s) failed to be updated.", "error")
+                flash(f"{fail_count} 个变量更新失败。", "error")
             if skipped:
                 skipped_repr = ", ".join(repr(k) for k in sorted(skipped))
                 flash(
-                    f"The variables with these keys: {skipped_repr} were skipped "
-                    "because they already exists",
+                    f"以下键对应的变量：{skipped_repr} 已被跳过，"
+                    "因为它们已经存在",
                     "warning",
                 )
             self.update_redirect()
@@ -5085,10 +5079,10 @@ class DagRunModelView(AirflowModelView):
                     dr.start_date = timezone.utcnow()
                 dr.state = state
             session.commit()
-            flash(f"{count} dag runs were set to {state}.")
+            flash(f"{count} 个流程运行已设置为 {state}。")
         except Exception as ex:
             flash(str(ex), "error")
-            flash("Failed to set state", "error")
+            flash("设置状态失败", "error")
         return redirect(self.get_default_url())
 
     @action(
@@ -5114,9 +5108,9 @@ class DagRunModelView(AirflowModelView):
                     session=session,
                 )
             altered_ti_count = len(altered_tis)
-            flash(f"{count} dag runs and {altered_ti_count} task instances were set to failed")
+            flash(f"{count} 个流程运行和 {altered_ti_count} 个任务实例已设置为失败")
         except Exception:
-            flash("Failed to set state", "error")
+            flash("设置状态失败", "error")
         return redirect(self.get_default_url())
 
     @action(
@@ -5142,9 +5136,9 @@ class DagRunModelView(AirflowModelView):
                     session=session,
                 )
             altered_ti_count = len(altered_tis)
-            flash(f"{count} dag runs and {altered_ti_count} task instances were set to success")
+            flash(f"{count} 个流程运行和 {altered_ti_count} 个任务实例已设置为成功")
         except Exception:
-            flash("Failed to set state", "error")
+            flash("设置状态失败", "error")
         return redirect(self.get_default_url())
 
     @action("clear", "Clear the state", "All task instances would be cleared, are you sure?", single=False)
@@ -5167,9 +5161,9 @@ class DagRunModelView(AirflowModelView):
                 cleared_ti_count += len(tis)
                 models.clear_task_instances(tis, session, dag=dag)
 
-            flash(f"{count} dag runs and {cleared_ti_count} task instances were cleared")
+            flash(f"{count} 个流程运行和 {cleared_ti_count} 个任务实例已被清除")
         except Exception:
-            flash("Failed to clear state", "error")
+            flash("清除状态失败", "error")
         return redirect(self.get_default_url())
 
 
@@ -5630,9 +5624,9 @@ class TaskInstanceModelView(AirflowModelView):
                 task_instances=task_instances, session=session, clear_downstream=False
             )
             session.commit()
-            flash(f"{count} task instance{'s have' if count > 1 else ' has'} been cleared")
+            flash(f"{count} 个任务实例{'已被清除' if count > 1 else '已被清除'}")
         except Exception as e:
-            flash(f'Failed to clear task instances: "{e}"', "error")
+            flash(f'清除任务实例失败: "{e}"', "error")
 
         self.update_redirect()
         return redirect(self.get_redirect())
@@ -5657,11 +5651,12 @@ class TaskInstanceModelView(AirflowModelView):
             )
             session.commit()
             flash(
-                f"Cleared {selected_ti_count} selected task instance{'s' if selected_ti_count > 1 else ''} "
-                f"and {downstream_ti_count} downstream dependencies"
+                f"清除了 {selected_ti_count} 个选中的任务实例"
+                f"{'和' if downstream_ti_count > 0 else ''} "
+                f"{downstream_ti_count} 个下游依赖"
             )
         except Exception as e:
-            flash(f'Failed to clear task instances: "{e}"', "error")
+            flash(f'清除任务实例失败: "{e}"', "error")
 
         self.update_redirect()
         return redirect(self.get_redirect())
@@ -5687,9 +5682,9 @@ class TaskInstanceModelView(AirflowModelView):
             for ti in tis:
                 ti.set_state(target_state, session)
             session.commit()
-            flash(f"{count} task instances were set to '{target_state}'")
+            flash(f"{count} 个任务实例已设置为 '{target_state}'")
         except Exception:
-            flash("Failed to set state", "error")
+            flash("设置状态失败", "error")
 
     @action("set_failed", "Set state to 'failed'", "", single=False)
     @auth.has_access_dag_entities("PUT", DagAccessEntity.TASK_INSTANCE)
