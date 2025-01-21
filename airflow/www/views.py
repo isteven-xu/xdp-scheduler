@@ -1045,7 +1045,7 @@ class Airflow(AirflowBaseView):
                         if not get_auth_manager().batch_is_authorized_dag(requests):
                             stacktrace = "已隐藏 - 您没有权限读取该文件中的所有流程"
                     flash(
-                        f"损坏的 DAG: [{import_error.filename}]\r{stacktrace}",
+                        f"损坏的流程: [{import_error.filename}]\r{stacktrace}",
                         "dag_import_error",
                     )
         from airflow.plugins_manager import import_errors as plugin_import_errors
