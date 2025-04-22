@@ -16,52 +16,52 @@
  specific language governing permissions and limitations
  under the License.
 #}
-{##}
-{#{% macro locale_menu(languages) %}#}
-{#  {% set locale = session['locale'] %}#}
-{#  {% if not locale %}#}
-{#      {% set locale = 'en' %}#}
-{#  {% endif %}#}
-{#  <li class="dropdown">#}
-{#    <a class="dropdown-toggle" href="javascript:void(0)">#}
-{#       <div class="f16"><i class="flag {{languages[locale].get('flag')}}"></i><b class="caret"></b></div>#}
-{#    </a>#}
-{#    {% if languages.keys()|length > 1 %}#}
-{#      <ul class="dropdown-menu">#}
-{#        <li class="dropdown">#}
-{#          {% for lang in languages %}#}
-{#            {% if lang != locale %}#}
-{#              <a href="{{appbuilder.get_url_for_locale(lang)}}">#}
-{#                <div class="f16"><i class="flag {{languages[lang].get('flag')}}"></i> - {{languages[lang].get('name')}}#}
-{#              </div></a>#}
-{#            {% endif %}#}
-{#          {% endfor %}#}
-{#        </li>#}
-{#      </ul>#}
-{#    {% endif %}#}
-{#  </li>#}
-{#{% endmacro %}#}
-{##}
+
+{% macro locale_menu(languages) %}
+  {% set locale = session['locale'] %}
+  {% if not locale %}
+      {% set locale = 'en' %}
+  {% endif %}
+  <li class="dropdown">
+    <a class="dropdown-toggle" href="javascript:void(0)">
+       <div class="f16"><i class="flag {{languages[locale].get('flag')}}"></i><b class="caret"></b></div>
+    </a>
+    {% if languages.keys()|length > 1 %}
+      <ul class="dropdown-menu">
+        <li class="dropdown">
+          {% for lang in languages %}
+            {% if lang != locale %}
+              <a href="{{appbuilder.get_url_for_locale(lang)}}">
+                <div class="f16"><i class="flag {{languages[lang].get('flag')}}"></i> - {{languages[lang].get('name')}}
+              </div></a>
+            {% endif %}
+          {% endfor %}
+        </li>
+      </ul>
+    {% endif %}
+  </li>
+{% endmacro %}
+
 {# clock and timezone menu #}
-{#<li class="dropdown" id="timezone-dropdown">#}
-{#  <a class="dropdown-toggle" style="display:none" href="#">#}
-{#    <time id="clock" class="js-tooltip"></time>#}
-{#    <b class="caret"></b>#}
-{#  </a>#}
-{#  <ul class="dropdown-menu" id="timezone-menu">#}
-{#    <li id="timezone-utc"><a data-timezone="UTC" href="#">UTC</a></li>#}
-{#    <li id="timezone-server" style="display: none;"><a data-timezone="{{ server_timezone }}" href="#">{{ server_timezone }}</a></li>#}
-{#    <li id="timezone-local"><a href="#">Local</a></li>#}
-{#    <li id="timezone-manual" style="display: none"><a data-timezone="" href="#"></a></li>#}
-{#    <li role="separator" class="divider"></li>#}
-{#    <li>#}
-{#      <form>#}
-{#        <label for="timezone-other">Other</label>#}
-{#        <input id="timezone-other" placeholder="Select Timezone name" autocomplete="off" tabindex="-1">#}
-{#      </form>#}
-{#    </li>#}
-{#  </ul>#}
-{#</li>#}
+<li class="dropdown" id="timezone-dropdown">
+  <a class="dropdown-toggle" style="display:none" href="#">
+    <time id="clock" class="js-tooltip"></time>
+    <b class="caret"></b>
+  </a>
+  <ul class="dropdown-menu" id="timezone-menu">
+    <li id="timezone-utc"><a data-timezone="UTC" href="#">UTC</a></li>
+    <li id="timezone-server" style="display: none;"><a data-timezone="{{ server_timezone }}" href="#">{{ server_timezone }}</a></li>
+    <li id="timezone-local"><a href="#">Local</a></li>
+    <li id="timezone-manual" style="display: none"><a data-timezone="" href="#"></a></li>
+    <li role="separator" class="divider"></li>
+<!--    <li>-->
+<!--      <form>-->
+<!--        <label for="timezone-other">Other</label>-->
+<!--        <input id="timezone-other" placeholder="Select Timezone name" autocomplete="off" tabindex="-1">-->
+<!--      </form>-->
+<!--    </li>-->
+  </ul>
+</li>
 
 {% if auth_manager.is_logged_in() %}
   <li class="dropdown">
