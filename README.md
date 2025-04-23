@@ -1,1 +1,3 @@
-数据调度平台，基于 airflow 二次开发
+## 基于Airflow 2.10.4
+<img src="/docs/dags.png" >
+<img src="/docs/detail.png" >
