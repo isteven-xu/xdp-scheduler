@@ -95,7 +95,7 @@ const InstanceTooltip = ({
       {group?.tooltip && <Text>{group.tooltip}</Text>}
       {isMapped && totalTasks > 0 && (
         <Text>
-          映射任务: {totalTasks}
+          任务集: {totalTasks}
           {/*{isGroup && " group"}*/}
           {/*{totalTasks > 1 && "s"}*/}
         </Text>

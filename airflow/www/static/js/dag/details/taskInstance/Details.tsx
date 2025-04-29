@@ -176,7 +176,7 @@ const Details = ({ gridInstance, taskInstance, group }: Props) => {
               <Td colSpan={2}>
                 {/*{totalTasks} {isGroup ? "Task Group" : "Task"}*/}
                 {/*{totalTasks === 1 ? " " : "s "}*/}
-                映射任务: {totalTasks}
+                任务集: {totalTasks}
               </Td>
             </Tr>
           )}

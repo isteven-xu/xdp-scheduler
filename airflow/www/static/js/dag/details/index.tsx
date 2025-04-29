@@ -373,7 +373,7 @@ const Details = ({
             <Tab>
               <BiBracket size={16} />
               <Text as="strong" ml={1}>
-               映射任务
+               任务集
               </Text>
             </Tab>
           )}

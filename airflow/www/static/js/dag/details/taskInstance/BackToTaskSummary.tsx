@@ -31,7 +31,7 @@ const BackToTaskSummary = ({ isMapIndexDefined, onClick }: Props) => {
   return (
     <Flex justifyContent="right">
       <Button variant="ghost" colorScheme="blue" onClick={onClick} size="lg">
-        Back to Dynamic Task Summary
+        返回
       </Button>
     </Flex>
   );
